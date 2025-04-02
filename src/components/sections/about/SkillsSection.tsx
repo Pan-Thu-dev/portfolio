@@ -2,25 +2,14 @@
 
 import { motion } from 'framer-motion';
 import SectionTitle from '@/components/ui/section-title';
+import { Skill } from '@/app/about/skills-data';
 
-const skills = [
-  { name: 'React', level: 90 },
-  { name: 'Next.js', level: 85 },
-  { name: 'JavaScript', level: 90 },
-  { name: 'TypeScript', level: 80 },
-  { name: 'TailwindCSS', level: 85 },
-  { name: 'Node.js', level: 80 },
-  { name: 'Firebase', level: 75 },
-  { name: 'MongoDB', level: 70 },
-];
+interface SkillsSectionProps {
+  skills: Skill[];
+  technologies: string[];
+}
 
-const technologies = [
-  'React', 'Next.js', 'TypeScript', 'TailwindCSS', 'Firebase', 
-  'Node.js', 'Express', 'MongoDB', 'Git', 'GitHub', 'Vercel',
-  'Framer Motion', 'REST API', 'GraphQL', 'Responsive Design'
-];
-
-const SkillsSection = () => {
+const SkillsSection = ({ skills, technologies }: SkillsSectionProps) => {
   return (
     <section className="py-12 px-4 md:px-6 bg-[#0f0f0f]">
       <div className="container mx-auto">
