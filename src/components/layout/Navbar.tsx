@@ -20,7 +20,7 @@ const Navbar = () => {
           </Link>
           <nav className="hidden items-center gap-8 text-sm font-medium md:flex">
             <Link
-              href="#about"
+              href="/about"
               className="text-gray-400 transition-colors hover:text-gray-100"
             >
               About
@@ -56,4 +56,4 @@ const Navbar = () => {
   );
 };
 
-export default Navbar;
+export default Navbar; 

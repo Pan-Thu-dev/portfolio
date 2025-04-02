@@ -79,26 +79,16 @@ const Hero = () => {
             className="flex items-center justify-center"
           >
             <div className="relative aspect-square w-full max-w-[400px] group">
-              <motion.div
-                animate={{ 
-                  rotate: [0, 5, -5, 0],
-                }}
-                transition={{
-                  duration: 6,
-                  repeat: Infinity,
-                  ease: "easeInOut"
-                }}
-                className="relative w-full h-full"
-              >
+              <div className="relative w-full h-full">
                 <Image
-                  src="/profile-pic.svg"
+                  src="/assets/images/profile-pic.svg"
                   alt="Hero Illustration"
                   fill
                   className="object-contain invert brightness-200 filter transition-all duration-300 group-hover:scale-105"
                   priority
                 />
                 <div className="absolute inset-0 bg-gradient-to-tr from-fuchsia-500/10 to-cyan-500/10 rounded-full blur-3xl scale-95 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              </motion.div>
+              </div>
             </div>
           </motion.div>
         </div>
@@ -107,4 +97,4 @@ const Hero = () => {
   );
 };
 
-export default Hero;
+export default Hero; 
