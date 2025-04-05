@@ -1,16 +1,10 @@
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
-import Link from 'next/link';
 import { Github, ExternalLink } from 'lucide-react';
 import { getProjectBySlug, getProjects } from '../projects-data'; 
 import Navbar from '@/components/layout/Navbar';
 import Badge from '@/components/ui/badge';
 import Button from '@/components/ui/button';
-import { Project } from '@/types/project';
-
-interface ProjectPageParams {
-  slug: string;
-}
 
 // Generate static paths for all projects at build time
 export async function generateStaticParams() {
@@ -21,7 +15,11 @@ export async function generateStaticParams() {
 }
 
 // Optional: Generate metadata dynamically
-export async function generateMetadata({ params }: { params: ProjectPageParams }) {
+export async function generateMetadata({ 
+  params 
+}: { 
+  params: { slug: string } 
+}) {
   const project = getProjectBySlug(params.slug);
   if (!project) {
     return { title: 'Project Not Found' };
@@ -32,8 +30,11 @@ export async function generateMetadata({ params }: { params: ProjectPageParams }
   };
 }
 
+type Props = {
+  params: { slug: string }
+}
 
-export default function ProjectDetailsPage({ params }: { params: ProjectPageParams }) {
+export default async function ProjectDetailsPage({ params }: Props) {
   const project = getProjectBySlug(params.slug);
 
   // If project not found, show 404 page
