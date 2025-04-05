@@ -19,7 +19,7 @@ export async function generateStaticParams() {
 }
 
 // Optional: Generate metadata dynamically
-export async function generateMetadata({ params }: { params: ProjectPageParams }) {
+export async function generateMetadata({ params }: { params: { slug: string } }) {
   const project = getProjectBySlug(params.slug);
   if (!project) {
     return { title: 'Project Not Found' };
@@ -31,7 +31,7 @@ export async function generateMetadata({ params }: { params: ProjectPageParams }
 }
 
 
-export default function ProjectDetailsPage({ params }: { params: ProjectPageParams }) {
+export default function ProjectDetailsPage({ params }: { params: { slug: string } }) {
   const project = getProjectBySlug(params.slug);
 
   // If project not found, show 404 page
