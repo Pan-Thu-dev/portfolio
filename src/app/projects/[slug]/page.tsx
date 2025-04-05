@@ -1,12 +1,10 @@
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
-import Link from 'next/link';
 import { Github, ExternalLink } from 'lucide-react';
 import { getProjectBySlug, getProjects } from '../projects-data'; 
 import Navbar from '@/components/layout/Navbar';
 import Badge from '@/components/ui/badge';
 import Button from '@/components/ui/button';
-import { Project } from '@/types/project';
 
 interface ProjectPageParams {
   slug: string;
