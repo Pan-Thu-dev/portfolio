@@ -6,10 +6,6 @@ import Navbar from '@/components/layout/Navbar';
 import Badge from '@/components/ui/badge';
 import Button from '@/components/ui/button';
 
-interface ProjectPageParams {
-  slug: string;
-}
-
 // Generate static paths for all projects at build time
 export async function generateStaticParams() {
   const projects = getProjects();
