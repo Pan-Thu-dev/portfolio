@@ -6,6 +6,10 @@ import Navbar from '@/components/layout/Navbar';
 import Badge from '@/components/ui/badge';
 import Button from '@/components/ui/button';
 
+interface ProjectPageParams {
+  slug: string;
+}
+
 // Generate static paths for all projects at build time
 export async function generateStaticParams() {
   const projects = getProjects();
@@ -15,7 +19,11 @@ export async function generateStaticParams() {
 }
 
 // Optional: Generate metadata dynamically
-export async function generateMetadata({ params }: { params: { slug: string } }) {
+export async function generateMetadata({ 
+  params 
+}: { 
+  params: { slug: string } 
+}) {
   const project = getProjectBySlug(params.slug);
   if (!project) {
     return { title: 'Project Not Found' };
@@ -26,8 +34,11 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   };
 }
 
+type Props = {
+  params: { slug: string }
+}
 
-export default function ProjectDetailsPage({ params }: { params: { slug: string } }) {
+export default async function ProjectDetailsPage({ params }: Props) {
   const project = getProjectBySlug(params.slug);
 
   // If project not found, show 404 page
