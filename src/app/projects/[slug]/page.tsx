@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import { Github, ExternalLink } from 'lucide-react';
-import { getProjectBySlug, getProjects } from '../projects-data'; 
+import { getProjectBySlug, getProjects } from '../projects-data';
 import Navbar from '@/components/layout/Navbar';
 import Badge from '@/components/ui/badge';
 import Button from '@/components/ui/button';
@@ -15,12 +15,9 @@ export async function generateStaticParams() {
 }
 
 // Optional: Generate metadata dynamically
-export async function generateMetadata({ 
-  params 
-}: { 
-  params: { slug: string } 
-}) {
-  const project = getProjectBySlug(params.slug);
+export async function generateMetadata(props: { params: tParams }) {
+  const { slug } = await props.params;
+  const project = getProjectBySlug(slug);
   if (!project) {
     return { title: 'Project Not Found' };
   }
@@ -30,12 +27,11 @@ export async function generateMetadata({
   };
 }
 
-type Props = {
-  params: { slug: string }
-}
+type tParams = Promise<{ slug: string }>;
 
-export default async function ProjectDetailsPage({ params }: Props) {
-  const project = getProjectBySlug(params.slug);
+export default async function ProjectDetailsPage(props: { params: tParams }) {
+  const { slug } = await props.params;
+  const project = getProjectBySlug(slug);
 
   // If project not found, show 404 page
   if (!project) {
@@ -151,4 +147,4 @@ export default async function ProjectDetailsPage({ params }: Props) {
       </div>
     </main>
   );
-} 
+}
