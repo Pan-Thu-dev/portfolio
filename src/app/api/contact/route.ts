@@ -2,6 +2,14 @@ import { NextResponse } from 'next/server';
 import { firestore, ensureFirestoreSetup } from '@/lib/firebaseAdmin';
 import { sendContactNotification } from '@/lib/emailService';
 
+/**
+ * Type definition for Firestore errors
+ */
+interface FirestoreError extends Error {
+  code?: number | string;
+  details?: string;
+}
+
 export async function POST(request: Request) {
   // Check if Firestore was initialized successfully
   if (!firestore) {
@@ -67,11 +75,12 @@ export async function POST(request: Request) {
         { success: true, message: 'Message sent successfully!' }, 
         { status: 200 }
       );
-    } catch (firestoreError: any) { // Type as any since Firebase errors have no specific type export
+    } catch (error: unknown) {
+      const firestoreError = error as FirestoreError;
       console.error('Firestore operation failed:', firestoreError);
       
       // Handle database not initialized yet
-      if (firestoreError.code === 5) { // NOT_FOUND error
+      if (firestoreError.code === 5 || firestoreError.code === '5') { // NOT_FOUND error
         return NextResponse.json(
           { error: 'Database service not fully initialized. Please enable Firestore in the Firebase Console and try again later.' }, 
           { status: 503 } // Service Unavailable

@@ -5,6 +5,14 @@ import { getFirestore, Firestore } from 'firebase-admin/firestore';
 let firestoreInstance: Firestore | null = null;
 
 /**
+ * Type definition for Firebase errors
+ */
+interface FirebaseError extends Error {
+  code?: number | string;
+  details?: string;
+}
+
+/**
  * Check if Firestore database and collections exist and create them if needed
  */
 async function ensureFirestoreSetup(db: Firestore) {
@@ -14,8 +22,9 @@ async function ensureFirestoreSetup(db: Firestore) {
     await db.collection('_setup_check').limit(1).get();
     console.log('Firestore database exists');
     return true;
-  } catch (error: any) {
-    if (error.code === 5) { // NOT_FOUND error
+  } catch (error: unknown) {
+    const fbError = error as FirebaseError;
+    if (fbError.code === 5 || fbError.code === '5' || fbError.code === 'not-found') { // NOT_FOUND error
       console.warn('Firebase: Database may not be created yet. Please ensure Firestore is enabled in the Firebase console.');
       // Return false but don't throw - let the calling code decide how to handle this
       return false;
