@@ -12,6 +12,8 @@ interface ButtonProps {
   className?: string;
   external?: boolean;
   onClick?: () => void;
+  type?: 'button' | 'submit' | 'reset';
+  disabled?: boolean;
 }
 
 const Button = ({ 
@@ -20,13 +22,15 @@ const Button = ({
   variant = 'primary', 
   className = '',
   external = false,
-  onClick
+  onClick,
+  type = 'button',
+  disabled = false
 }: ButtonProps) => {
   const baseStyles = 'inline-flex h-10 items-center justify-center rounded-md px-8 text-sm font-medium transition-all';
   
   const variantStyles = {
-    primary: 'bg-gradient-to-r from-fuchsia-500 to-cyan-500 text-white hover:opacity-90',
-    secondary: 'border border-gray-700 bg-transparent text-gray-300 hover:bg-gray-800'
+    primary: 'bg-gradient-to-r from-fuchsia-500 to-cyan-500 text-white hover:opacity-90 disabled:opacity-50',
+    secondary: 'border border-gray-700 bg-transparent text-gray-300 hover:bg-gray-800 disabled:opacity-50'
   };
   
   const buttonStyles = `${baseStyles} ${variantStyles[variant]} ${className}`;
@@ -42,7 +46,12 @@ const Button = ({
   }
   
   return (
-    <button className={buttonStyles} onClick={onClick}>
+    <button 
+      className={buttonStyles} 
+      onClick={onClick}
+      type={type}
+      disabled={disabled}
+    >
       {children}
     </button>
   );

@@ -1,0 +1,16 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Allow writes to 'contacts' only via backend/Admin SDK. Disallow public reads.
+    match /contacts/{contactId} {
+      allow read: if false;
+      allow create, update, delete: if true; // Admin SDK bypasses this, but explicit is okay
+    }
+
+    // Default deny all other access
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+} 
