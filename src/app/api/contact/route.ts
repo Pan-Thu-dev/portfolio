@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { firestore, ensureFirestoreSetup } from '@/lib/firebaseAdmin';
+import { sendContactNotification } from '@/lib/emailService';
 
 export async function POST(request: Request) {
   // Check if Firestore was initialized successfully
@@ -35,22 +36,32 @@ export async function POST(request: Request) {
         );
       }
 
-      // Prepare contact data
+      // Prepare contact data with timestamp
+      const submittedAt = new Date();
       const contactData = {
         name: name.trim(),
         email: email.trim(),
         message: message.trim(),
-        submittedAt: new Date(),
+        submittedAt,
         status: 'new',
       };
 
       // Get a reference to contacts collection
       const contactsRef = firestore.collection('contacts');
       
-      // Add the document
+      // Add the document to Firestore
       const docRef = await contactsRef.add(contactData);
-      
       console.log('Contact form submission saved with ID:', docRef.id);
+      
+      // Send email notification (don't await to prevent slowdown)
+      sendContactNotification({
+        name: contactData.name,
+        email: contactData.email,
+        message: contactData.message,
+        submittedAt
+      }).catch(err => {
+        console.error('Email notification failed, but form was saved:', err);
+      });
       
       return NextResponse.json(
         { success: true, message: 'Message sent successfully!' }, 
