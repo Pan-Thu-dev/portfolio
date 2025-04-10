@@ -1,9 +1,12 @@
-import ProjectForm from '@/components/admin/ProjectForm';
+import { AdminHeader, ProjectForm } from '@/components/admin';
 
 const AddProjectPage = () => {
   return (
     <div>
-      <h2 className="text-2xl font-semibold text-white mb-6">Add New Project</h2>
+      <AdminHeader 
+        title="Add New Project" 
+        description="Create a new project for your portfolio."
+      />
       <ProjectForm />
     </div>
   );

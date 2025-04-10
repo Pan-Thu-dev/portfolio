@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import ProjectForm from '@/components/admin/ProjectForm';
+import { AdminHeader, ProjectForm } from '@/components/admin';
 import { Project } from '@/types/project';
 import { Loader2 } from 'lucide-react';
 
@@ -55,7 +55,10 @@ const EditProjectPage = () => {
 
   return (
     <div>
-      <h2 className="text-2xl font-semibold text-white mb-6">Edit Project: {project?.title}</h2>
+      <AdminHeader 
+        title={`Edit Project: ${project.title}`} 
+        description="Update the details of your existing project."
+      />
       <ProjectForm initialData={project} isEditing={true} />
     </div>
   );

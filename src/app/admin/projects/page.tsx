@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Button from '@/components/ui/button';
+import { AdminHeader } from '@/components/admin';
 import { Project } from '@/types/project';
 import { Loader2, PlusCircle, Edit, Trash2 } from 'lucide-react';
 
@@ -60,27 +61,35 @@ const AdminProjectsPage = () => {
     }
   };
 
-  if (loading) {
-    return <div className="flex justify-center items-center h-40"><Loader2 className="h-8 w-8 animate-spin text-fuchsia-500" /></div>;
-  }
-
   if (error) {
     return <p className="text-red-500">Error loading projects: {error}</p>;
   }
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-semibold text-white">Manage Projects</h2>
-        <Button href="/admin/projects/new">
-          <PlusCircle className="mr-2 h-4 w-4" /> Add New Project
-        </Button>
-      </div>
+      <AdminHeader 
+        title="Manage Projects" 
+        description="View, edit, and delete your portfolio projects."
+        action={{
+          label: "Add New Project",
+          href: "/admin/projects/new",
+          icon: PlusCircle
+        }}
+      />
 
-      {projects.length === 0 ? (
-        <p className="text-gray-400">No projects found. Add your first project!</p>
+      {loading ? (
+        <div className="flex justify-center items-center h-40">
+          <Loader2 className="h-8 w-8 animate-spin text-fuchsia-500" />
+        </div>
+      ) : projects.length === 0 ? (
+        <div className="bg-gray-800/50 border border-gray-700 rounded-lg p-8 text-center">
+          <p className="text-gray-400 mb-4">No projects found. Add your first project!</p>
+          <Button href="/admin/projects/new">
+            <PlusCircle className="mr-2 h-4 w-4" /> Add New Project
+          </Button>
+        </div>
       ) : (
-        <div className="overflow-x-auto bg-[#0f0f0f] rounded-lg border border-gray-800">
+        <div className="overflow-x-auto bg-gray-800/50 rounded-lg border border-gray-700">
           <table className="min-w-full divide-y divide-gray-700">
             <thead className="bg-gray-800">
               <tr>
@@ -89,9 +98,9 @@ const AdminProjectsPage = () => {
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
-            <tbody className="bg-[#0f0f0f] divide-y divide-gray-700">
+            <tbody className="divide-y divide-gray-700">
               {projects.map((project) => (
-                <tr key={project.id} className="hover:bg-gray-800/50 transition-colors">
+                <tr key={project.id} className="hover:bg-gray-800/90 transition-colors">
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">{project.title}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">{project.slug}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
