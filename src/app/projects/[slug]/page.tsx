@@ -6,18 +6,22 @@ import Navbar from '@/components/layout/Navbar';
 import Badge from '@/components/ui/badge';
 import Button from '@/components/ui/button';
 
+interface tParams {
+  slug: string;
+}
+
 // Generate static paths for all projects at build time
 export async function generateStaticParams() {
-  const projects = getProjects();
+  const projects = await getProjects();
   return projects.map((project) => ({
     slug: project.slug,
   }));
 }
 
 // Optional: Generate metadata dynamically
-export async function generateMetadata(props: { params: tParams }) {
-  const { slug } = await props.params;
-  const project = getProjectBySlug(slug);
+export async function generateMetadata({ params }: { params: tParams }) {
+  const { slug } = params;
+  const project = await getProjectBySlug(slug);
   if (!project) {
     return { title: 'Project Not Found' };
   }
@@ -27,11 +31,9 @@ export async function generateMetadata(props: { params: tParams }) {
   };
 }
 
-type tParams = Promise<{ slug: string }>;
-
-export default async function ProjectDetailsPage(props: { params: tParams }) {
-  const { slug } = await props.params;
-  const project = getProjectBySlug(slug);
+export default async function ProjectDetailsPage({ params }: { params: tParams }) {
+  const { slug } = params;
+  const project = await getProjectBySlug(slug);
 
   // If project not found, show 404 page
   if (!project) {
@@ -78,7 +80,7 @@ export default async function ProjectDetailsPage(props: { params: tParams }) {
         </div>
 
         {/* Main Content Area */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 md:gap-12">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column (Description, Features) */}
           <div className="lg:col-span-2 space-y-8">
             {/* Main Image */}
@@ -112,38 +114,26 @@ export default async function ProjectDetailsPage(props: { params: tParams }) {
             </div>
           </div>
 
-          {/* Right Column (Screenshots, maybe related projects later) */}
-          <div className="lg:col-span-1 space-y-8">
-            {screenshots && screenshots.length > 0 && (
-              <div>
-                <h2 className="text-2xl font-semibold text-white mb-4">Screenshots</h2>
-                <div className="space-y-4">
-                  {screenshots.map((ss, index) => (
-                    <div key={index} className="relative aspect-video w-full overflow-hidden rounded-lg border border-gray-800">
-                       <Image
-                        src={ss}
-                        alt={`Screenshot ${index + 1} for ${title}`}
-                        fill
-                        className="object-cover"
-                        loading="lazy" // Lazy load screenshots
-                        sizes="(max-width: 1024px) 100vw, 33vw"
-                      />
-                    </div>
-                  ))}
-                </div>
+          {/* Right Column (Screenshots) */}
+          {screenshots && screenshots.length > 0 && (
+            <div className="lg:col-span-1 space-y-8">
+              <h2 className="text-2xl font-semibold text-white mb-4">Screenshots</h2>
+              <div className="space-y-4">
+                {screenshots.map((screenshot, index) => (
+                  <div key={index} className="relative aspect-video w-full overflow-hidden rounded-lg border border-gray-800">
+                    <Image
+                      src={screenshot}
+                      alt={`Screenshot ${index + 1} of ${title}`}
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 33vw, 400px"
+                    />
+                  </div>
+                ))}
               </div>
-            )}
-             {/* You could add a "Related Projects" section here later */}
-          </div>
+            </div>
+          )}
         </div>
-
-        {/* Back Button */}
-        <div className="mt-16 text-center">
-            <Button href="/#projects">
-                Back to Projects
-            </Button>
-        </div>
-
       </div>
     </main>
   );

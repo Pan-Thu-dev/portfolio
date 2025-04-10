@@ -1,9 +1,11 @@
 import SectionTitle from '@/components/ui/section-title';
 import ProjectCard from '@/components/ui/project-card';
-import { getProjects } from '@/app/projects/projects-data'; // Fetch project data
+import { getProjects } from '@/app/projects/projects-data';
 
-const ProjectsSection = () => {
-  const projects = getProjects(); // Get the project data
+// Make the component async
+export default async function ProjectsSection() {
+  // Fetch projects
+  const projects = await getProjects();
 
   return (
     <section id="projects" className="py-20 px-4 md:px-6 bg-[#0a0a0a]">
@@ -25,6 +27,4 @@ const ProjectsSection = () => {
       </div>
     </section>
   );
-};
-
-export default ProjectsSection; 
+} 
