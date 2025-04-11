@@ -14,6 +14,11 @@ interface ProjectCardProps {
 const ProjectCard = ({ project, index }: ProjectCardProps) => {
   const { slug, title, description, technologies, imageUrl } = project;
 
+  // Default placeholder image when imageUrl is empty or undefined
+  const imageSrc = imageUrl && imageUrl.trim() !== '' 
+    ? imageUrl 
+    : '/assets/images/placeholder-project.jpg'; // Replace with your placeholder image path
+
   // Function to limit description to a certain number of words
   const truncateDescription = (text: string, wordLimit: number = 15) => {
     const words = text.split(' ');
@@ -33,7 +38,7 @@ const ProjectCard = ({ project, index }: ProjectCardProps) => {
       </Link>
       <div className="relative aspect-video overflow-hidden">
         <Image
-          src={imageUrl}
+          src={imageSrc}
           alt={`Thumbnail for ${title}`}
           fill
           className="object-cover transition-transform duration-300 group-hover:scale-105"

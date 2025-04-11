@@ -9,4 +9,6 @@ export type Project = {
   githubUrl: string; // Link to GitHub repository
   features: string[]; // Key features for the details page
   screenshots?: string[]; // Optional paths to screenshot images for details page
+  createdAt?: string; // ISO date string for when the project was created
+  updatedAt?: string; // ISO date string for when the project was last updated
 }; 
