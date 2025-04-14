@@ -11,8 +11,6 @@ import {
   Cpu, 
   LogOut, 
   Menu,
-  UserCircle,
-  Settings
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -22,11 +20,6 @@ const navItems = [
   { name: 'Projects', href: '/admin/projects', icon: FolderKanban },
   { name: 'Skills', href: '/admin/skills', icon: BarChart3 },
   { name: 'Technologies', href: '/admin/technologies', icon: Cpu },
-];
-
-// Define sidebar footer items
-const footerItems = [
-  { name: 'Settings', href: '/admin/settings', icon: Settings },
 ];
 
 const AdminSidebar = () => {
@@ -94,22 +87,6 @@ const AdminSidebar = () => {
 
       {/* Sidebar Footer */}
       <div className="p-4 border-t border-gray-800">
-        {footerItems.map((item) => (
-          <Link 
-            key={item.name} 
-            href={item.href}
-            className={`
-              flex items-center py-3 px-4 my-1 rounded-lg transition-colors
-              ${isActive(item.href) 
-                ? 'bg-fuchsia-900/30 text-fuchsia-500' 
-                : 'text-gray-400 hover:text-white hover:bg-gray-800'
-              }
-            `}
-          >
-            <item.icon className="h-5 w-5 flex-shrink-0" />
-            {!collapsed && <span className="ml-3">{item.name}</span>}
-          </Link>
-        ))}
         <Link 
           href="/"
           className="flex items-center py-3 px-4 my-1 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"

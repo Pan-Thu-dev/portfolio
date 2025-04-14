@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Button from '@/components/ui/button';
 import { Project } from '@/types/project';
 import { Loader2 } from 'lucide-react';
+import { useToast } from '@/context/ToastContext';
 
 interface ProjectFormProps {
   initialData?: Project & { id: string }; // Pass existing data for editing
@@ -18,6 +19,7 @@ const textToArray = (text: string): string[] => text ? text.split(/,|\n/).map(s 
 
 const ProjectForm = ({ initialData, isEditing = false }: ProjectFormProps) => {
   const router = useRouter();
+  const { showToast } = useToast();
   const [formData, setFormData] = useState<Partial<Project>>({
     title: '',
     slug: '',
@@ -79,12 +81,19 @@ const ProjectForm = ({ initialData, isEditing = false }: ProjectFormProps) => {
         throw new Error(result.error || `Failed to ${isEditing ? 'update' : 'create'} project`);
       }
 
-      alert(`Project ${isEditing ? 'updated' : 'created'} successfully!`);
+      // Show success toast notification
+      showToast(
+        `Project ${isEditing ? 'updated' : 'created'} successfully!`, 
+        'success'
+      );
+      
       router.push('/admin/projects'); // Redirect to the projects list
       router.refresh(); // Refresh server components
 
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An unknown error occurred.');
+      const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred.';
+      setError(errorMessage);
+      showToast(errorMessage, 'error');
     } finally {
       setLoading(false);
     }

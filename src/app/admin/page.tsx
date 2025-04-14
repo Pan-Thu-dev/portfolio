@@ -41,7 +41,6 @@ export default function AdminDashboard() {
   });
   const [loading, setLoading] = useState(true);
 
-  // Fetch stats (in a real app, this would come from an API)
   useEffect(() => {
     const fetchStats = async () => {
       try {
@@ -49,12 +48,18 @@ export default function AdminDashboard() {
         const projectsResponse = await fetch('/api/projects');
         const projectsData = await projectsResponse.json();
         
-        // For now, we're just getting counts from the projects API
-        // In the future, you would also fetch skills and technologies counts
+        // Fetch skills count
+        const skillsResponse = await fetch('/api/skills');
+        const skillsData = await skillsResponse.json();
+
+        // Fetch technologies count
+        const technologiesResponse = await fetch('/api/technologies');
+        const technologiesData = await technologiesResponse.json();
+
         setStats({
           projects: projectsData.length,
-          skills: 0, // Placeholder until skills API is implemented
-          technologies: 0, // Placeholder until technologies API is implemented
+          skills: skillsData.length,
+          technologies: technologiesData.length,
         });
       } catch (error) {
         console.error('Error fetching stats:', error);

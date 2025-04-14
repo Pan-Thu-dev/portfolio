@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import SectionTitle from '@/components/ui/section-title';
-import { Skill } from '@/app/about/skills-data';
+import { Skill } from '@/types/skill';
 
 interface SkillsSectionProps {
   skills: Skill[];

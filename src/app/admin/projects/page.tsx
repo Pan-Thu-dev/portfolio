@@ -7,15 +7,22 @@ import Button from '@/components/ui/button';
 import { AdminHeader } from '@/components/admin';
 import { Project } from '@/types/project';
 import { Loader2, PlusCircle, Edit, Trash2 } from 'lucide-react';
+import { useToast } from '@/context/ToastContext';
+import ConfirmationDialog from '@/components/ui/confirmation-dialog';
 
 type ProjectWithId = Project & { id: string };
 
 const AdminProjectsPage = () => {
   const router = useRouter();
+  const { showToast } = useToast();
   const [projects, setProjects] = useState<ProjectWithId[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [confirmDialog, setConfirmDialog] = useState<{ isOpen: boolean; projectId: string | null }>({
+    isOpen: false,
+    projectId: null
+  });
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -37,12 +44,28 @@ const AdminProjectsPage = () => {
     fetchProjects();
   }, []);
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this project? This cannot be undone.')) {
-      return;
-    }
+  const confirmDelete = (id: string) => {
+    setConfirmDialog({
+      isOpen: true,
+      projectId: id
+    });
+  };
+
+  const cancelDelete = () => {
+    setConfirmDialog({
+      isOpen: false,
+      projectId: null
+    });
+  };
+
+  const handleDelete = async () => {
+    const id = confirmDialog.projectId;
+    if (!id) return;
+    
     setDeletingId(id);
     setError(null);
+    setConfirmDialog({ isOpen: false, projectId: null });
+    
     try {
       const response = await fetch(`/api/projects/${id}`, { method: 'DELETE' });
       const result = await response.json();
@@ -51,11 +74,12 @@ const AdminProjectsPage = () => {
       }
       // Remove deleted project from state
       setProjects(prev => prev.filter(p => p.id !== id));
-      alert('Project deleted successfully.');
+      showToast('Project deleted successfully.', 'success');
       router.refresh(); // Refresh server components if needed elsewhere
     } catch (err) {
-       setError(err instanceof Error ? err.message : 'An unknown error occurred.');
-       alert(`Error deleting project: ${error}`); // Show error in alert
+       const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred.';
+       setError(errorMessage);
+       showToast(`Error deleting project: ${errorMessage}`, 'error');
     } finally {
       setDeletingId(null);
     }
@@ -108,7 +132,7 @@ const AdminProjectsPage = () => {
                       <Edit className="h-4 w-4" /> <span className="sr-only">Edit</span>
                     </Link>
                     <button
-                      onClick={() => handleDelete(project.id)}
+                      onClick={() => confirmDelete(project.id)}
                       disabled={deletingId === project.id}
                       className="text-red-500 hover:text-red-400 disabled:opacity-50 inline-flex items-center"
                       title="Delete"
@@ -130,6 +154,17 @@ const AdminProjectsPage = () => {
           </table>
         </div>
       )}
+
+      {/* Confirmation Dialog */}
+      <ConfirmationDialog
+        isOpen={confirmDialog.isOpen}
+        title="Confirm Deletion"
+        message="Are you sure you want to delete this project? This action cannot be undone."
+        confirmLabel="Delete"
+        onConfirm={handleDelete}
+        onCancel={cancelDelete}
+        isProcessing={!!deletingId}
+      />
     </div>
   );
 };
