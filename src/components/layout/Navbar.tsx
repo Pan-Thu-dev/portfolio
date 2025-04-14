@@ -2,8 +2,22 @@
 
 import { motion } from 'framer-motion';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 const Navbar = () => {
+  const pathname = usePathname();
+  const isHomePage = pathname === '/';
+
+  // Helper function to determine the correct link href based on current page
+  const getLinkHref = (section: string) => {
+    // If we're on the home page, use anchor links to scroll to sections
+    if (isHomePage) {
+      return `#${section}`;
+    }
+    // If we're on another page, redirect to home page + anchor
+    return `/#${section}`;
+  };
+
   return (
     <motion.header
       initial={{ y: -20, opacity: 0 }}
@@ -26,19 +40,13 @@ const Navbar = () => {
               About
             </Link>
             <Link
-              href="#projects"
+              href={getLinkHref('projects')}
               className="text-gray-400 transition-colors hover:text-gray-100"
             >
               Projects
             </Link>
             <Link
-              href="#skills"
-              className="text-gray-400 transition-colors hover:text-gray-100"
-            >
-              Skills
-            </Link>
-            <Link
-              href="#contact"
+              href={getLinkHref('contact')}
               className="inline-flex items-center justify-center rounded-md bg-gradient-to-r from-fuchsia-500 to-cyan-500 px-6 py-1.5 text-sm font-medium text-white transition-all hover:opacity-90"
             >
               Let&apos;s Talk
