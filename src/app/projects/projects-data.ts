@@ -1,7 +1,7 @@
 // This can be a server file if data needs fetching, or just a simple data structure file.
 // For simplicity, we'll keep it as static data for now.
 
-import { firestore } from '@/lib/firebaseAdmin';
+import { firestore } from '@/lib/firebase/admin';
 import { Project } from '@/types/project';
 
 // Function to get all projects from Firestore

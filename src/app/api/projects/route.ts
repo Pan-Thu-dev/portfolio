@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { firestore } from '@/lib/firebaseAdmin';
+import { firestore } from '@/lib/firebase/admin';
 import { Timestamp } from 'firebase-admin/firestore';
 import { Project } from '@/types/project';
 import type { DocumentData, QueryDocumentSnapshot } from 'firebase-admin/firestore';
@@ -41,7 +41,7 @@ export async function POST(request: Request) {
     // Generate slug if not provided (simple example)
     const slug = projectData.slug || projectData.title.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
 
-    const newProject: Project & { createdAt: Timestamp } = {
+    const newProject = {
       ...projectData,
       slug: slug, // Ensure slug is set
       // Ensure array fields are arrays, even if empty

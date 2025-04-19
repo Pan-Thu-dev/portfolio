@@ -1,14 +1,23 @@
-import { NextResponse } from 'next/server';
-import { firestore, ensureFirestoreSetup } from '@/lib/firebaseAdmin';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { NextRequest, NextResponse } from 'next/server';
+import { firestore, ensureFirestoreSetup, authenticateAdminRequest } from '@/lib/firebase';
+import { isAllowedAdmin } from '@/lib/firebase/permissions';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    // Check authentication
-    const session = await getServerSession(authOptions);
-    if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    // Get authentication header
+    const authHeader = request.headers.get('Authorization');
+    
+    try {
+      // Authenticate the request
+      const decodedToken = await authenticateAdminRequest(authHeader);
+      
+      // Check if user has admin permissions
+      if (!isAllowedAdmin(decodedToken.email || '')) {
+        return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 });
+      }
+    } catch (error: any) {
+      console.error('Authentication failed:', error);
+      return NextResponse.json({ error: error.message || 'Authentication failed' }, { status: 401 });
     }
 
     // Check if Firestore was initialized successfully

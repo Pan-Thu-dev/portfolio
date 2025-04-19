@@ -2,8 +2,11 @@
 
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
-import { Loader2, FolderKanban, Cpu, BarChart3, LogOut } from 'lucide-react';
-import { useSession, signOut } from 'next-auth/react';
+import { Loader2, FolderKanban, Cpu, BarChart3, LogOut, AlertTriangle, RefreshCw } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import { signOut } from '@/lib/firebase/auth';
+import { isAllowedAdmin } from '@/lib/firebase/permissions';
+import { useRouter } from 'next/navigation';
 import ContactDataTable from '@/components/admin/ContactDataTable';
 
 // Stats Card Component
@@ -12,13 +15,15 @@ const StatCard = ({
   value, 
   icon, 
   href, 
-  loading 
+  loading,
+  error
 }: { 
   title: string; 
   value: number | string; 
   icon: React.ReactNode; 
   href: string;
   loading: boolean;
+  error?: boolean;
 }) => (
   <Link 
     href={href}
@@ -29,13 +34,22 @@ const StatCard = ({
       <div className="text-fuchsia-500">{icon}</div>
     </div>
     <div className="text-2xl font-bold text-white">
-      {loading ? <Loader2 className="h-6 w-6 animate-spin text-gray-500" /> : value}
+      {loading ? (
+        <Loader2 className="h-6 w-6 animate-spin text-gray-500" />
+      ) : error ? (
+        <span className="text-red-400 text-base">Error loading</span>
+      ) : (
+        value
+      )}
     </div>
   </Link>
 );
 
 export default function AdminDashboard() {
-  const { data: session } = useSession();
+  const { user, loading: authLoading } = useAuth();
+  const router = useRouter();
+  const [isAuthorized, setIsAuthorized] = useState(true);
+  
   // Stats state
   const [stats, setStats] = useState({
     projects: 0,
@@ -43,36 +57,123 @@ export default function AdminDashboard() {
     technologies: 0,
   });
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+  const [debugInfo, setDebugInfo] = useState<string | null>(null);
+
+  // Check authorization and redirect if not logged in
+  useEffect(() => {
+    if (!authLoading) {
+      if (!user) {
+        router.push('/admin/login');
+      } else if (!isAllowedAdmin(user.email || '')) {
+        setIsAuthorized(false);
+      }
+    }
+  }, [user, authLoading, router]);
+
+  const fetchStats = async () => {
+    if (!user) return;
+    
+    setLoading(true);
+    setError(false);
+    setDebugInfo(null);
+    
+    try {
+      // Fetch directly without authentication
+      const [projectsRes, skillsRes, techRes] = await Promise.all([
+        fetch('/api/projects'),
+        fetch('/api/skills'),
+        fetch('/api/technologies')
+      ]);
+      
+      // Check responses
+      if (!projectsRes.ok) {
+        throw new Error(`Projects API error: ${projectsRes.status}`);
+      }
+      if (!skillsRes.ok) {
+        throw new Error(`Skills API error: ${skillsRes.status}`);
+      }
+      if (!techRes.ok) {
+        throw new Error(`Technologies API error: ${techRes.status}`);
+      }
+      
+      // Parse data
+      const projectsData = await projectsRes.json();
+      const skillsData = await skillsRes.json();
+      const techData = await techRes.json();
+      
+      // Log successful results
+      console.log('Fetched projects:', projectsData?.length || 0);
+      console.log('Fetched skills:', skillsData?.length || 0);
+      console.log('Fetched technologies:', techData?.length || 0);
+      
+      // Update stats
+      setStats({
+        projects: Array.isArray(projectsData) ? projectsData.length : 0,
+        skills: Array.isArray(skillsData) ? skillsData.length : 0,
+        technologies: Array.isArray(techData) ? techData.length : 0,
+      });
+    } catch (error: any) {
+      console.error('Error fetching stats:', error);
+      setDebugInfo(`Fetch error: ${error.message}`);
+      setError(true);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        // Fetch project count
-        const projectsResponse = await fetch('/api/projects');
-        const projectsData = await projectsResponse.json();
-        
-        // Fetch skills count
-        const skillsResponse = await fetch('/api/skills');
-        const skillsData = await skillsResponse.json();
+    if (user && !authLoading) {
+      fetchStats();
+    }
+  }, [user, authLoading]);
 
-        // Fetch technologies count
-        const technologiesResponse = await fetch('/api/technologies');
-        const technologiesData = await technologiesResponse.json();
+  const handleSignOut = async () => {
+    await signOut();
+    router.push('/admin/login');
+  };
 
-        setStats({
-          projects: projectsData.length,
-          skills: skillsData.length,
-          technologies: technologiesData.length,
-        });
-      } catch (error) {
-        console.error('Error fetching stats:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  // Show loading state during authentication check
+  if (authLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="h-8 w-8 animate-spin text-fuchsia-500" />
+      </div>
+    );
+  }
 
-    fetchStats();
-  }, []);
+  // Display unauthorized message
+  if (!isAuthorized) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 text-center px-4">
+        <div className="bg-yellow-500/10 p-4 rounded-full mb-4">
+          <AlertTriangle className="h-12 w-12 text-yellow-500" />
+        </div>
+        <h2 className="text-2xl font-bold text-white mb-3">Access Denied</h2>
+        <p className="text-gray-400 max-w-md mb-6">
+          Your email address is not authorized to access the admin panel. Please contact the administrator for access.
+        </p>
+        <div className="flex gap-4 flex-wrap justify-center">
+          <button
+            onClick={handleSignOut}
+            className="px-4 py-2 bg-fuchsia-500 hover:bg-fuchsia-600 text-white rounded-md flex items-center"
+          >
+            <LogOut className="h-4 w-4 mr-2" />
+            Sign Out
+          </button>
+          <Link
+            href="/"
+            className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-md"
+          >
+            Return to Website
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  // Only show dashboard if authenticated
+  if (!user) return null;
 
   return (
     <div>
@@ -82,28 +183,33 @@ export default function AdminDashboard() {
           <p className="text-gray-400">Manage your portfolio content from this central dashboard.</p>
         </div>
         
-        {session && (
-          <div className="mt-4 md:mt-0 flex items-center gap-3">
-            <p className="text-gray-400">Logged in as <span className="text-white">{session.user?.name}</span></p>
-            <button 
-              onClick={() => signOut({ callbackUrl: '/admin/login' })}
-              className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
-            >
-              <LogOut className="h-4 w-4" />
-              <span>Sign Out</span>
-            </button>
-          </div>
-        )}
+        <div className="mt-4 md:mt-0 flex items-center gap-3">
+          <p className="text-gray-400">Logged in as <span className="text-white">{user.email}</span></p>
+          <button 
+            onClick={handleSignOut}
+            className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
+          >
+            <LogOut className="h-4 w-4" />
+            <span>Sign Out</span>
+          </button>
+        </div>
       </header>
 
+      {debugInfo && (
+        <div className="mb-4 p-4 bg-yellow-500/10 rounded-lg">
+          <p className="text-yellow-300 text-sm font-mono">{debugInfo}</p>
+        </div>
+      )}
+
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
         <StatCard 
           title="Projects" 
           value={stats.projects} 
           icon={<FolderKanban size={24} />}
           href="/admin/projects"
           loading={loading}
+          error={error}
         />
         <StatCard 
           title="Skills" 
@@ -111,6 +217,7 @@ export default function AdminDashboard() {
           icon={<BarChart3 size={24} />}
           href="/admin/skills"
           loading={loading}
+          error={error}
         />
         <StatCard 
           title="Technologies" 
@@ -118,8 +225,27 @@ export default function AdminDashboard() {
           icon={<Cpu size={24} />}
           href="/admin/technologies"
           loading={loading}
+          error={error}
         />
       </div>
+
+      {/* Refresh button */}
+      {(error || loading) && (
+        <div className="mb-8 flex justify-center">
+          <button
+            onClick={fetchStats}
+            disabled={loading}
+            className="px-4 py-2 bg-fuchsia-500 hover:bg-fuchsia-600 disabled:opacity-50 rounded-md text-white flex items-center"
+          >
+            {loading ? (
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
+              <RefreshCw className="h-4 w-4 mr-2" />
+            )}
+            {loading ? 'Loading...' : 'Refresh Data'}
+          </button>
+        </div>
+      )}
 
       {/* Contact Submissions */}
       <section>

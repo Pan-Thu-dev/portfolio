@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { firestore } from '@/lib/firebaseAdmin';
+import { firestore } from '@/lib/firebase/admin';
 import { Timestamp } from 'firebase-admin/firestore';
 import { Skill } from '@/types/skill';
 import { convertTimestampsToISO } from '@/lib/utils';

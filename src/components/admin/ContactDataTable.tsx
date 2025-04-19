@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Inbox, Loader2, ExternalLink, RefreshCw, LogIn } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/contexts/AuthContext';
 
 type ContactSubmission = {
   id: string;
@@ -14,31 +15,49 @@ type ContactSubmission = {
   status: string;
 };
 
+interface ContactsResponse {
+  contacts: ContactSubmission[];
+}
+
 export default function ContactDataTable() {
   const [contacts, setContacts] = useState<ContactSubmission[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [isUnauthorized, setIsUnauthorized] = useState(false);
   const router = useRouter();
+  const { user, loading: authLoading } = useAuth();
 
   const fetchContacts = async () => {
     setLoading(true);
     setError(null);
-    setIsUnauthorized(false);
     
     try {
-      const response = await fetch('/api/admin/contacts');
-      
-      if (response.status === 401) {
-        setIsUnauthorized(true);
+      if (!user) {
         throw new Error('You need to be logged in to view contact submissions');
       }
       
+      // Get fresh token directly from the user
+      const token = await user.getIdToken(true);
+      console.log('Token acquired for contacts API', token ? 'success' : 'failed');
+      
+      // Use direct fetch with authorization header
+      const response = await fetch('/api/admin/contacts', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      console.log('Contacts API response status:', response.status);
+      
       if (!response.ok) {
+        if (response.status === 401) {
+          throw new Error('Authentication required. Please sign in again.');
+        }
         throw new Error(`Error fetching contacts: ${response.status}`);
       }
       
-      const data = await response.json();
+      const data = await response.json() as ContactsResponse;
+      console.log('Contact data received:', data?.contacts?.length || 0);
       setContacts(data.contacts || []);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load contacts');
@@ -49,19 +68,23 @@ export default function ContactDataTable() {
   };
 
   useEffect(() => {
-    fetchContacts();
-  }, []);
+    if (user && !authLoading) {
+      fetchContacts();
+    }
+  }, [user, authLoading]);
 
-  if (loading) {
+  // Show loading during auth check
+  if (authLoading) {
     return (
       <div className="flex flex-col items-center justify-center py-12">
         <Loader2 className="h-8 w-8 text-fuchsia-500 animate-spin mb-4" />
-        <p className="text-gray-400">Loading contact submissions...</p>
+        <p className="text-gray-400">Checking authentication...</p>
       </div>
     );
   }
 
-  if (isUnauthorized) {
+  // Show auth required message if not logged in
+  if (!user) {
     return (
       <div className="flex flex-col items-center justify-center py-12 text-center">
         <div className="bg-yellow-500/10 p-3 rounded-full mb-4">
@@ -78,6 +101,15 @@ export default function ContactDataTable() {
           <LogIn className="h-4 w-4 mr-2" />
           Log In
         </button>
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12">
+        <Loader2 className="h-8 w-8 text-fuchsia-500 animate-spin mb-4" />
+        <p className="text-gray-400">Loading contact submissions...</p>
       </div>
     );
   }

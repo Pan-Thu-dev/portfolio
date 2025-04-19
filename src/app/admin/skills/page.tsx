@@ -7,7 +7,7 @@ import Button from '@/components/ui/button/Button';
 import { AdminHeader } from '@/components/admin';
 import { Skill } from '@/types/skill';
 import { Loader2, PlusCircle, Edit, Trash2 } from 'lucide-react';
-import { useToast } from '@/context/ToastContext';
+import { useToast } from '@/contexts/ToastContext';
 import ConfirmationDialog from '@/components/ui/confirmation-dialog';
 
 const AdminSkillsPage = () => {

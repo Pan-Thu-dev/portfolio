@@ -1,7 +1,7 @@
 'use client';
 
 import { AdminSidebar } from '@/components/admin';
-import { SessionProvider } from 'next-auth/react';
+import { AuthProvider } from '@/contexts/AuthContext';
 import { ReactNode } from 'react';
 
 // !!! IMPORTANT: Add Authentication/Authorization checks here in a real app !!!
@@ -13,7 +13,7 @@ export default function AdminLayout({
   children: ReactNode;
 }) {
   return (
-    <SessionProvider>
+    <AuthProvider>
       <div className="min-h-screen bg-[#0a0a0a] text-gray-300">
         {/* Admin Sidebar */}
         <AdminSidebar />
@@ -26,6 +26,6 @@ export default function AdminLayout({
           </main>
         </div>
       </div>
-    </SessionProvider>
+    </AuthProvider>
   );
 } 
