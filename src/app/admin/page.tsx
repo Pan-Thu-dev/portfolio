@@ -2,7 +2,9 @@
 
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
-import { Loader2, FolderKanban, Database, Cpu, BarChart3 } from 'lucide-react';
+import { Loader2, FolderKanban, Cpu, BarChart3, LogOut } from 'lucide-react';
+import { useSession, signOut } from 'next-auth/react';
+import ContactDataTable from '@/components/admin/ContactDataTable';
 
 // Stats Card Component
 const StatCard = ({ 
@@ -33,6 +35,7 @@ const StatCard = ({
 );
 
 export default function AdminDashboard() {
+  const { data: session } = useSession();
   // Stats state
   const [stats, setStats] = useState({
     projects: 0,
@@ -73,9 +76,24 @@ export default function AdminDashboard() {
 
   return (
     <div>
-      <header className="mb-8">
-        <h1 className="text-3xl font-bold text-white mb-2">Admin Dashboard</h1>
-        <p className="text-gray-400">Manage your portfolio content from this central dashboard.</p>
+      <header className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-white mb-2">Admin Dashboard</h1>
+          <p className="text-gray-400">Manage your portfolio content from this central dashboard.</p>
+        </div>
+        
+        {session && (
+          <div className="mt-4 md:mt-0 flex items-center gap-3">
+            <p className="text-gray-400">Logged in as <span className="text-white">{session.user?.name}</span></p>
+            <button 
+              onClick={() => signOut({ callbackUrl: '/admin/login' })}
+              className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
+            >
+              <LogOut className="h-4 w-4" />
+              <span>Sign Out</span>
+            </button>
+          </div>
+        )}
       </header>
 
       {/* Stats Grid */}
@@ -103,50 +121,10 @@ export default function AdminDashboard() {
         />
       </div>
 
-      {/* Quick Links */}
+      {/* Contact Submissions */}
       <section>
-        <h2 className="text-xl font-semibold text-white mb-4">Quick Actions</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <Link 
-            href="/admin/projects/new" 
-            className="flex items-center gap-2 bg-gray-800 hover:bg-gray-750 p-4 rounded-lg border border-gray-700 hover:border-fuchsia-500 transition-all"
-          >
-            <span className="bg-fuchsia-500/10 p-2 rounded text-fuchsia-500">
-              <FolderKanban size={18} />
-            </span>
-            <span>Add New Project</span>
-          </Link>
-          
-          <Link 
-            href="/admin/skills/new" 
-            className="flex items-center gap-2 bg-gray-800 hover:bg-gray-750 p-4 rounded-lg border border-gray-700 hover:border-fuchsia-500 transition-all"
-          >
-            <span className="bg-fuchsia-500/10 p-2 rounded text-fuchsia-500">
-              <BarChart3 size={18} />
-            </span>
-            <span>Add New Skill</span>
-          </Link>
-          
-          <Link 
-            href="/admin/technologies/new" 
-            className="flex items-center gap-2 bg-gray-800 hover:bg-gray-750 p-4 rounded-lg border border-gray-700 hover:border-fuchsia-500 transition-all"
-          >
-            <span className="bg-fuchsia-500/10 p-2 rounded text-fuchsia-500">
-              <Cpu size={18} />
-            </span>
-            <span>Add New Technology</span>
-          </Link>
-          
-          <Link 
-            href="/api/database/backup" 
-            className="flex items-center gap-2 bg-gray-800 hover:bg-gray-750 p-4 rounded-lg border border-gray-700 hover:border-fuchsia-500 transition-all"
-          >
-            <span className="bg-fuchsia-500/10 p-2 rounded text-fuchsia-500">
-              <Database size={18} />
-            </span>
-            <span>Backup Database</span>
-          </Link>
-        </div>
+        <h2 className="text-xl font-semibold text-white mb-4">Contact Submissions</h2>
+        <ContactDataTable />
       </section>
     </div>
   );
