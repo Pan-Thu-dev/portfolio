@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { firestore, ensureFirestoreSetup } from '@/lib/firebaseAdmin';
+import { firestore, ensureFirestoreSetup } from '@/lib/firebase/admin';
 import { sendContactNotification } from '@/lib/emailService';
 
 /**

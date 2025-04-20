@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Button from '@/components/ui/button/Button';
 import { Technology } from '@/types/technology';
 import { Loader2 } from 'lucide-react';
-import { useToast } from '@/context/ToastContext';
+import { useToast } from '@/contexts/ToastContext';
 
 interface TechnologyFormProps {
   initialData?: Technology; // Pass existing data for editing

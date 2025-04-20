@@ -1,3 +1,5 @@
+import { Timestamp } from 'firebase-admin/firestore';
+
 export type Project = {
     slug: string; // URL-friendly identifier
     title: string;
@@ -9,6 +11,6 @@ export type Project = {
     githubUrl: string; // Link to GitHub repository
     features: string[]; // Key features for the details page
     screenshots?: string[]; // Optional paths to screenshot images for details page
-    createdAt?: string; // ISO date string for when the project was created
-    updatedAt?: string; // ISO date string for when the project was last updated
+    createdAt?: string | Timestamp; // ISO date string or Firestore Timestamp
+    updatedAt?: string | Timestamp; // ISO date string or Firestore Timestamp
   }; 

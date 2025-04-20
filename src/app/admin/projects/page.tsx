@@ -7,7 +7,7 @@ import Button from '@/components/ui/button';
 import { AdminHeader } from '@/components/admin';
 import { Project } from '@/types/project';
 import { Loader2, PlusCircle, Edit, Trash2 } from 'lucide-react';
-import { useToast } from '@/context/ToastContext';
+import { useToast } from '@/contexts/ToastContext';
 import ConfirmationDialog from '@/components/ui/confirmation-dialog';
 
 type ProjectWithId = Project & { id: string };

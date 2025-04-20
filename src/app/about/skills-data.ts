@@ -1,6 +1,6 @@
 // This is a server file that can access environment variables
 
-import { firestore } from '@/lib/firebaseAdmin';
+import { firestore } from '@/lib/firebase/admin';
 import { Skill } from '@/types/skill';
 import { convertTimestampsToISO } from '@/lib/utils';
 

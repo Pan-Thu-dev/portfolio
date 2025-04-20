@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Button from '@/components/ui/button';
 import { Project } from '@/types/project';
 import { Loader2 } from 'lucide-react';
-import { useToast } from '@/context/ToastContext';
+import { useToast } from '@/contexts/ToastContext';
 
 interface ProjectFormProps {
   initialData?: Project & { id: string }; // Pass existing data for editing

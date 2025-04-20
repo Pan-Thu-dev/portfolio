@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Button from '@/components/ui/button/Button';
 import { Skill } from '@/types/skill';
 import { Loader2 } from 'lucide-react';
-import { useToast } from '@/context/ToastContext';
+import { useToast } from '@/contexts/ToastContext';
 
 interface SkillFormProps {
   initialData?: Skill; // Pass existing data for editing

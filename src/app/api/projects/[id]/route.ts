@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { firestore } from '@/lib/firebaseAdmin';
+import { firestore } from '@/lib/firebase/admin';
 import { Timestamp } from 'firebase-admin/firestore';
 import { Project } from '@/types/project';
 
@@ -52,7 +52,7 @@ export async function PUT(request: Request, context: RouteContext) {
     // if (projectData.title === '') { ... }
 
     // Prepare update data
-    const updatePayload: Partial<Project> & { updatedAt: Timestamp } = {
+    const updatePayload = {
         ...projectData,
         // Ensure arrays are handled correctly if provided
         technologies: projectData.technologies || projectSnap.data()?.technologies || [],
