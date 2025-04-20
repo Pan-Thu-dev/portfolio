@@ -52,7 +52,7 @@ export const authFetch = async <T>(
     }
     
     return await response.json();
-  } catch (error: any) {
+  } catch (error: Error | unknown) {
     console.error('API request failed:', error);
     throw error;
   }
@@ -68,7 +68,7 @@ export const authGet = <T>(url: string): Promise<T> => {
 /**
  * Make an authenticated POST request
  */
-export const authPost = <T>(url: string, data: any): Promise<T> => {
+export const authPost = <T, D = Record<string, unknown>>(url: string, data: D): Promise<T> => {
   return authFetch<T>(url, {
     method: 'POST',
     body: JSON.stringify(data),
@@ -78,7 +78,7 @@ export const authPost = <T>(url: string, data: any): Promise<T> => {
 /**
  * Make an authenticated PUT request
  */
-export const authPut = <T>(url: string, data: any): Promise<T> => {
+export const authPut = <T, D = Record<string, unknown>>(url: string, data: D): Promise<T> => {
   return authFetch<T>(url, {
     method: 'PUT',
     body: JSON.stringify(data),

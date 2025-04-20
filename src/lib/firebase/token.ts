@@ -23,7 +23,11 @@ export const parseAuthCookie = (cookieString: string): string | null => {
  * @param expiresIn Expiration time in seconds (default: 1 hour)
  */
 export const setAuthCookie = (token: string, expiresIn = 3600): void => {
+  // Include a timestamp in the cookie name to help debugging
+  const timestamp = new Date().toISOString().replace(/[:.-]/g, '');
   document.cookie = `auth_token=${token}; path=/; max-age=${expiresIn}; secure; samesite=strict`;
+  document.cookie = `auth_timestamp=${timestamp}; path=/; max-age=${expiresIn}; secure; samesite=strict`;
+  console.log('Auth token set with expiry of', expiresIn, 'seconds');
 };
 
 /**
@@ -31,6 +35,8 @@ export const setAuthCookie = (token: string, expiresIn = 3600): void => {
  */
 export const removeAuthCookie = (): void => {
   document.cookie = 'auth_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; secure; samesite=strict';
+  document.cookie = 'auth_timestamp=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; secure; samesite=strict';
+  console.log('Auth token removed');
 };
 
 /**
@@ -41,6 +47,7 @@ export const removeAuthCookie = (): void => {
  */
 export const getFreshToken = async (user: User, forceRefresh = false): Promise<string> => {
   try {
+    console.log('Getting fresh token, force refresh:', forceRefresh);
     return await user.getIdToken(forceRefresh);
   } catch (error) {
     console.error('Error getting fresh token:', error);
@@ -50,29 +57,50 @@ export const getFreshToken = async (user: User, forceRefresh = false): Promise<s
 
 /**
  * Setup token refresh on a timer
- * Refreshes token every 50 minutes (10 minutes before 1 hour expiry)
+ * Refreshes token every 30 minutes (30 minutes before 1 hour expiry)
  * @param user The Firebase user
  * @returns Cleanup function to clear the refresh timer
  */
 export const setupTokenRefresh = (user: User): () => void => {
-  // Refresh every 50 minutes (3000000ms)
-  const refreshInterval = 3000000;
+  // Refresh every 30 minutes (1800000ms) instead of 50 minutes
+  // This ensures the token is refreshed well before it expires
+  const refreshInterval = 1800000;
+  
+  console.log('Setting up token refresh interval:', refreshInterval, 'ms');
+  
+  // Immediate token refresh to ensure we start with a fresh token
+  setTimeout(async () => {
+    try {
+      const token = await getFreshToken(user, true);
+      setAuthCookie(token);
+      console.log('Initial auth token refresh completed');
+    } catch (error) {
+      console.error('Failed initial auth token refresh:', error);
+    }
+  }, 1000);
   
   // Set up interval to refresh token
   const intervalId = setInterval(async () => {
     try {
+      if (!user) {
+        console.log('No user available for token refresh, clearing interval');
+        clearInterval(intervalId);
+        return;
+      }
+      
       const token = await getFreshToken(user, true);
       setAuthCookie(token);
       console.log('Auth token refreshed successfully');
     } catch (error) {
       console.error('Failed to refresh auth token:', error);
-      // If refresh fails, sign out (optional)
-      // await signOut();
     }
   }, refreshInterval);
   
   // Return cleanup function
-  return () => clearInterval(intervalId);
+  return () => {
+    console.log('Cleaning up token refresh interval');
+    clearInterval(intervalId);
+  };
 };
 
 /**

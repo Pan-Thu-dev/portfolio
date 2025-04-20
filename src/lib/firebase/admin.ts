@@ -135,16 +135,19 @@ export const verifyIdToken = async (token: string, checkRevoked = true): Promise
   try {
     const auth = getAuthAdmin();
     return await auth.verifyIdToken(token, checkRevoked);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Firebase token verification failed:', error);
     
     // Improve error message based on error code
-    if (error.code === 'auth/id-token-expired') {
-      throw new Error('Authentication token has expired. Please sign in again.');
-    } else if (error.code === 'auth/id-token-revoked') {
-      throw new Error('Authentication token has been revoked. Please sign in again.');
-    } else if (error.code === 'auth/invalid-id-token') {
-      throw new Error('Invalid authentication token. Please sign in again.');
+    if (error && typeof error === 'object' && 'code' in error) {
+      const firebaseError = error as FirebaseError;
+      if (firebaseError.code === 'auth/id-token-expired') {
+        throw new Error('Authentication token has expired. Please sign in again.');
+      } else if (firebaseError.code === 'auth/id-token-revoked') {
+        throw new Error('Authentication token has been revoked. Please sign in again.');
+      } else if (firebaseError.code === 'auth/invalid-id-token') {
+        throw new Error('Invalid authentication token. Please sign in again.');
+      }
     }
     
     throw new Error('Authentication failed. Please sign in again.');

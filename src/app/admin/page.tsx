@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Loader2, FolderKanban, Cpu, BarChart3, LogOut, AlertTriangle, RefreshCw } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { signOut } from '@/lib/firebase/auth';
@@ -63,6 +63,7 @@ export default function AdminDashboard() {
   // Check authorization and redirect if not logged in
   useEffect(() => {
     if (!authLoading) {
+      console.log('Auth state in admin page:', user?.email || 'No user');
       if (!user) {
         router.push('/admin/login');
       } else if (!isAllowedAdmin(user.email || '')) {
@@ -71,7 +72,7 @@ export default function AdminDashboard() {
     }
   }, [user, authLoading, router]);
 
-  const fetchStats = async () => {
+  const fetchStats = useCallback(async () => {
     if (!user) return;
     
     setLoading(true);
@@ -79,6 +80,7 @@ export default function AdminDashboard() {
     setDebugInfo(null);
     
     try {
+      console.log('Fetching stats with user:', user.email);
       // Fetch directly without authentication
       const [projectsRes, skillsRes, techRes] = await Promise.all([
         fetch('/api/projects'),
@@ -113,20 +115,20 @@ export default function AdminDashboard() {
         skills: Array.isArray(skillsData) ? skillsData.length : 0,
         technologies: Array.isArray(techData) ? techData.length : 0,
       });
-    } catch (error: any) {
+    } catch (error: Error | unknown) {
       console.error('Error fetching stats:', error);
-      setDebugInfo(`Fetch error: ${error.message}`);
+      setDebugInfo(`Fetch error: ${error instanceof Error ? error.message : 'Unknown error'}`);
       setError(true);
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
 
   useEffect(() => {
     if (user && !authLoading) {
       fetchStats();
     }
-  }, [user, authLoading]);
+  }, [user, authLoading, fetchStats]);
 
   const handleSignOut = async () => {
     await signOut();

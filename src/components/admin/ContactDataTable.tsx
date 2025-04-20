@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Inbox, Loader2, ExternalLink, RefreshCw, LogIn } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { useRouter } from 'next/navigation';
@@ -26,7 +26,7 @@ export default function ContactDataTable() {
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
 
-  const fetchContacts = async () => {
+  const fetchContacts = useCallback(async () => {
     setLoading(true);
     setError(null);
     
@@ -65,13 +65,13 @@ export default function ContactDataTable() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
 
   useEffect(() => {
     if (user && !authLoading) {
       fetchContacts();
     }
-  }, [user, authLoading]);
+  }, [user, authLoading, fetchContacts]);
 
   // Show loading during auth check
   if (authLoading) {

@@ -15,9 +15,10 @@ export async function GET(request: NextRequest) {
       if (!isAllowedAdmin(decodedToken.email || '')) {
         return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 });
       }
-    } catch (error: any) {
+    } catch (error: Error | unknown) {
       console.error('Authentication failed:', error);
-      return NextResponse.json({ error: error.message || 'Authentication failed' }, { status: 401 });
+      const errorMessage = error instanceof Error ? error.message : 'Authentication failed';
+      return NextResponse.json({ error: errorMessage }, { status: 401 });
     }
 
     // Check if Firestore was initialized successfully
