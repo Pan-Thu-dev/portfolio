@@ -25,7 +25,7 @@ export default function RootLayout({
         <ToastProvider>
           {children}
         </ToastProvider>
-        <SpeedInsights />
+        <SpeedInsights sampleRate={1.0} />
       </body>
     </html>
   );
