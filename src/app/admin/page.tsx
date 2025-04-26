@@ -9,7 +9,6 @@ import {
   BarChart3,
   LogOut,
   AlertTriangle,
-  RefreshCw,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { signOut } from "@/lib/firebase/auth";
